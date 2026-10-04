@@ -1,0 +1,129 @@
+{
+  "users": {
+    "director_9575": {
+      "id": "usr_ad1227fb",
+      "username": "Director_9575",
+      "salt": "60602520998d3f54355bc868adb844d8",
+      "hash": "b7d6c8133dc42cd082bea74d1bcd18b1fd70ae4ab819b97a923a493913220d40d1f71d9a8b3c3138e480340406f09f665992fec54753a893b3d7a5a2d3602d23",
+      "token": "9891844c76033fbcca501e6cbb7135b7440577797c0d8a79cbdf675504f7dd9a",
+      "profile": {
+        "id": "prof_ad226f69",
+        "username": "Director_9575",
+        "agencyName": "Director_9575 Aerospace Corp",
+        "avatar": "avatar_astronaut",
+        "level": 1,
+        "funds": 4822,
+        "science": 50,
+        "tier": 1,
+        "createdAt": 1791103933612,
+        "settings": {
+          "language": "en",
+          "soundVolume": 80,
+          "musicVolume": 60,
+          "graphicsQuality": "high"
+        }
+      },
+      "inventory": [
+        {
+          "id": "item_nose_1",
+          "partKey": "nose_aerodynamic",
+          "category": "nose",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 2
+        },
+        {
+          "id": "item_upper_1",
+          "partKey": "stage_upper_light",
+          "category": "upperStage",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 2
+        },
+        {
+          "id": "item_tank_1",
+          "partKey": "tank_cryo_medium",
+          "category": "mainTank",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 4
+        },
+        {
+          "id": "item_eng_1",
+          "partKey": "engine_vector",
+          "category": "engine",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 4
+        },
+        {
+          "id": "item_eng_2",
+          "partKey": "engine_vector",
+          "category": "engine",
+          "level": 2,
+          "rarity": "uncommon",
+          "quantity": 1
+        },
+        {
+          "id": "item_boost_1",
+          "partKey": "booster_solid_heavy",
+          "category": "booster",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 4
+        },
+        {
+          "id": "item_wing_1",
+          "partKey": "fins_delta",
+          "category": "wings",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 3
+        },
+        {
+          "id": "item_pay_1",
+          "partKey": "payload_weather_satellite",
+          "category": "payload",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 1
+        },
+        {
+          "id": "item_pay_2",
+          "partKey": "payload_suborbital_sensor",
+          "category": "payload",
+          "level": 1,
+          "rarity": "common",
+          "quantity": 2
+        }
+      ],
+      "rocket": {
+        "name": "Delta Horizon I",
+        "noseId": "nose_aerodynamic",
+        "upperStageId": "stage_upper_light",
+        "mainTankId": "tank_cryo_medium",
+        "engineId": "engine_vector",
+        "boosterId": "booster_solid_heavy",
+        "supplementaryBooster": "srb_2x",
+        "wingsId": "fins_delta",
+        "payloadId": "payload_suborbital_sensor"
+      },
+      "records": {
+        "highestAltitude": 0,
+        "longestFlight": 0,
+        "highestSpeed": 0,
+        "totalLaunches": 0,
+        "successfulLaunches": 0,
+        "failedLaunches": 0,
+        "totalDistance": 0,
+        "mostCoinsEarned": 0,
+        "bestRocketName": "Delta Horizon I"
+      },
+      "completedMissions": [],
+      "activeMissionId": "mission_1"
+    }
+  },
+  "sessions": {
+    "9891844c76033fbcca501e6cbb7135b7440577797c0d8a79cbdf675504f7dd9a": "director_9575"
+  }
+}

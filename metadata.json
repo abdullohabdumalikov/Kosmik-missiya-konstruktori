@@ -1,0 +1,8 @@
+{
+  "name": "Astra Horizon - Space Program Simulator",
+  "description": "A deep 2D rocket simulation and space agency management game inspired by Mars Horizon with multi-stage rocket design, atmospheric flight physics, crafting, and mission planning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

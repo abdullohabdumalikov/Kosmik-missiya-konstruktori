@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astra Horizon - Space Program Simulator</title>
+    <meta name="description" content="A deep 2D rocket simulation and space agency management game inspired by Mars Horizon with multi-stage rocket design, atmospheric flight physics, crafting, and mission planning." />
+    <meta property="og:title" content="Astra Horizon - Space Program Simulator" />
+    <meta property="og:description" content="A deep 2D rocket simulation and space agency management game inspired by Mars Horizon with multi-stage rocket design, atmospheric flight physics, crafting, and mission planning." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="/src/index.css" />
+  </head>
+  <body class="bg-slate-950 text-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    
+    <!-- TOP AGENCY HEADER (Locked, strictly fixed 48px) -->
+    <header class="h-12 border-b border-blue-900/40 bg-slate-950/95 shrink-0 px-4 flex items-center justify-between z-40 select-none">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 text-blue-400">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+          <span id="header-view-title" class="font-extrabold text-sm tracking-wide text-white">Vehicle Designer</span>
+        </div>
+        <div class="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 font-mono pl-3 border-l border-slate-800">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          <span id="header-calendar-date">June 1969</span>
+        </div>
+      </div>
+
+      <!-- Resource Metrics (Funds, Science, Tier, Audio, Profile) -->
+      <div class="flex items-center gap-3 sm:gap-5 font-mono text-xs">
+        <div class="flex items-center gap-1.5">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+          <span id="header-funds-val" class="font-bold text-white">2,500K</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M6 2v7.24a2 2 0 0 0 .53 1.36l6.94 7.64A2 2 0 0 0 15 19H9a2 2 0 0 1-1.53-.76L.53 10.6A2 2 0 0 1 0 9.24V2h6z"/></svg>
+          <span id="header-science-val" class="font-bold text-white">25</span>
+        </div>
+
+        <div class="hidden sm:flex items-center gap-1 text-slate-300">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span id="header-tier-val" class="font-bold text-indigo-300">Tier 1</span>
+        </div>
+
+        <!-- Audio Sound Toggle -->
+        <button id="btn-toggle-mute" class="w-7 h-7 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs flex items-center justify-center transition-colors" title="Toggle Audio">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+
+        <!-- Director Profile Badge -->
+        <button id="header-director-badge" class="flex items-center gap-1.5 px-2 py-1 rounded border border-slate-800 bg-slate-900/80 hover:border-blue-500/60 transition-all text-left">
+          <span id="header-avatar-icon" class="text-sm">🧑‍🚀</span>
+          <span id="header-username-text" class="text-xs font-bold text-slate-200 hidden md:inline max-w-[80px] truncate">Director</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- NAVIGATION SUB-BAR (Clean tabs) -->
+    <nav class="h-9 bg-slate-900/90 border-b border-slate-800/80 px-4 flex items-center gap-1 overflow-x-auto text-[11px] font-bold tracking-wider uppercase text-slate-400 shrink-0">
+      <button data-view="designer" class="nav-tab-btn px-3 h-full flex items-center gap-1.5 hover:text-white transition-colors active-nav-tab whitespace-nowrap">
+        <span>Designer</span>
+      </button>
+      <button data-view="missions" class="nav-tab-btn px-3 h-full flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap">
+        <span>Contracts</span>
+      </button>
+      <button data-view="crafting" class="nav-tab-btn px-3 h-full flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap">
+        <span>Blueprints</span>
+      </button>
+      <button data-view="flight" class="nav-tab-btn px-3 h-full flex items-center gap-1.5 hover:text-white transition-colors text-amber-400 whitespace-nowrap">
+        <span>Launch Complex</span>
+      </button>
+      <button data-view="records" class="nav-tab-btn px-3 h-full flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap">
+        <span>Records</span>
+      </button>
+      <button data-view="profile" class="nav-tab-btn px-3 h-full flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap">
+        <span>Dossier</span>
+      </button>
+      <button data-view="settings" class="nav-tab-btn px-3 h-full flex items-center gap-1.5 hover:text-white transition-colors whitespace-nowrap">
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- MAIN VIEWPORT CONTAINER (Height strictly locked, no page jumping) -->
+    <main class="flex-1 h-[calc(100vh-5.25rem)] overflow-hidden relative">
+
+      <!-- ============================================================== -->
+      <!-- VIEW 1: VEHICLE DESIGNER (3-COLUMN LOCKED VIEWPORT)            -->
+      <!-- ============================================================== -->
+      <section id="view-designer" class="app-view h-full w-full flex overflow-hidden">
+        
+        <!-- LEFT COLUMN: MINI UPGRADES & SHOP WINDOW -->
+        <aside class="w-72 lg:w-80 border-r border-blue-900/30 bg-slate-950/90 flex flex-col shrink-0 overflow-hidden z-20">
+          <div class="p-3 border-b border-slate-800 bg-slate-900/50">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300">Parts & Upgrades</span>
+              <button id="btn-shop-reroll" class="px-2 py-1 rounded bg-blue-950 hover:bg-blue-900 border border-blue-500/40 text-blue-300 font-mono text-[10px] font-bold flex items-center gap-1 shadow transition-all active:scale-95" title="Generate fresh random parts">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                Reroll (-25K)
+              </button>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div class="flex items-center gap-1 overflow-x-auto text-[10px] font-bold">
+              <button data-filter="all" class="designer-filter-btn px-2 py-0.5 rounded border border-slate-700 bg-slate-800 active-tab">All</button>
+              <button data-filter="engine" class="designer-filter-btn px-2 py-0.5 rounded border border-slate-700 bg-slate-800">Engines</button>
+              <button data-filter="mainTank" class="designer-filter-btn px-2 py-0.5 rounded border border-slate-700 bg-slate-800">Tanks</button>
+              <button data-filter="booster" class="designer-filter-btn px-2 py-0.5 rounded border border-slate-700 bg-slate-800">Boosters</button>
+              <button data-filter="wings" class="designer-filter-btn px-2 py-0.5 rounded border border-slate-700 bg-slate-800">Fins</button>
+              <button data-filter="upperStage" class="designer-filter-btn px-2 py-0.5 rounded border border-slate-700 bg-slate-800">Upper</button>
+              <button data-filter="upgrade" class="designer-filter-btn px-2 py-0.5 rounded border border-amber-500/40 bg-amber-950/30 text-amber-300">Upgrades</button>
+            </div>
+          </div>
+
+          <!-- Inventory Return Drop Zone (Active when dragging part off rocket) -->
+          <div id="inventory-return-zone" class="hidden m-2 p-2.5 rounded-xl border-2 border-dashed border-amber-400/90 bg-amber-950/90 text-amber-300 text-center font-mono font-bold text-xs shadow-xl animate-pulse">
+            <div class="flex items-center justify-center gap-1.5 text-amber-300">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>INVENTARGA QAYTARISH</span>
+            </div>
+            <div class="text-[9px] text-amber-200/80 font-normal mt-0.5">Drop here to unequip & return to inventory</div>
+          </div>
+
+          <!-- Parts Scrollable List -->
+          <div id="designer-shop-list" class="flex-1 overflow-y-auto p-2.5 space-y-2"></div>
+
+          <div class="p-2 border-t border-slate-800/80 bg-slate-950/80 text-[10px] text-slate-400 text-center font-mono">
+            Drag to rocket or click Equip · Drag off to unequip
+          </div>
+        </aside>
+
+        <!-- CENTER COLUMN: ROCKET ASSEMBLY BAY -->
+        <div id="designer-assembly-bay" class="flex-1 blueprint-grid-bay relative flex flex-col overflow-hidden">
+          
+          <!-- Top Bar: Rocket Name, Goal Banner & Fleet Hangar Button -->
+          <div class="absolute top-2.5 left-4 right-4 z-20 flex items-center justify-between gap-3 pointer-events-auto">
+            <div class="flex items-center gap-2">
+              <input type="text" id="designer-rocket-name" value="Aero-Scout I" class="px-2.5 py-1 rounded bg-slate-950/90 border border-blue-500/40 text-white font-mono text-xs font-bold focus:border-blue-400 focus:outline-none shadow backdrop-blur-sm" placeholder="Rocket Name">
+              
+              <!-- Active Mission Goal Indicator -->
+              <div id="designer-active-goal-chip" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded bg-emerald-950/80 border border-emerald-500/50 text-[11px] font-mono text-emerald-300 shadow backdrop-blur-sm">
+                <span class="text-emerald-400 font-bold">🎯 GOAL:</span>
+                <span id="designer-goal-name" class="font-bold text-white">Troposphere Sounding (8,000m)</span>
+                <span id="designer-goal-reward" class="text-amber-400 font-bold ml-1">+Ⓢ 25K</span>
+              </div>
+            </div>
+            
+            <!-- Fleet Hangar / Pre-Built Rockets Button -->
+            <button id="btn-open-hangar" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500/20 to-blue-500/20 hover:from-amber-500/30 hover:to-blue-500/30 border border-amber-400/60 text-amber-300 font-mono text-[11px] font-bold flex items-center gap-1.5 shadow backdrop-blur-sm transition-all active:scale-95">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-8a3 3 0 0 1 6 0v8"/></svg>
+              <span>Fleet Hangar</span>
+            </button>
+          </div>
+
+          <!-- Component Module Slots Chips with Explicit Unequip Buttons -->
+          <div class="absolute left-4 top-13 z-20 space-y-1.5 font-mono text-[10px] pointer-events-auto">
+            <div class="rocket-drop-slot group px-2 py-1 rounded border border-slate-700/80 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between gap-2 cursor-pointer transition-all" data-slot="nose" draggable="true" title="Drag to return to inventory">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-slate-400 font-bold uppercase text-[9px]">NOSE:</span>
+                <span id="slot-nose-val" class="text-cyan-300 font-bold truncate max-w-[85px]">Micro-Cone</span>
+                <span class="slot-target-tag hidden text-[9px] text-emerald-400 font-bold uppercase ml-1 animate-pulse">DROP</span>
+              </div>
+              <button class="btn-remove-slot text-slate-500 hover:text-rose-400 font-bold text-xs px-1" data-remove="nose" title="Unequip Nose">✕</button>
+            </div>
+
+            <div class="rocket-drop-slot group px-2 py-1 rounded border border-slate-700/80 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between gap-2 cursor-pointer transition-all" data-slot="upperStage" draggable="true" title="Drag to return to inventory">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-slate-400 font-bold uppercase text-[9px]">STAGE 2:</span>
+                <span id="slot-upper-val" class="text-cyan-300 font-bold truncate max-w-[85px]">None</span>
+                <span class="slot-target-tag hidden text-[9px] text-emerald-400 font-bold uppercase ml-1 animate-pulse">DROP</span>
+              </div>
+              <button class="btn-remove-slot text-slate-500 hover:text-rose-400 font-bold text-xs px-1" data-remove="upperStage" title="Unequip Stage 2">✕</button>
+            </div>
+
+            <div class="rocket-drop-slot group px-2 py-1 rounded border border-slate-700/80 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between gap-2 cursor-pointer transition-all" data-slot="mainTank" draggable="true" title="Drag to return to inventory">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-slate-400 font-bold uppercase text-[9px]">TANK:</span>
+                <span id="slot-tank-val" class="text-cyan-300 font-bold truncate max-w-[85px]">Micro Core</span>
+                <span class="slot-target-tag hidden text-[9px] text-emerald-400 font-bold uppercase ml-1 animate-pulse">DROP</span>
+              </div>
+              <button class="btn-remove-slot text-slate-500 hover:text-rose-400 font-bold text-xs px-1" data-remove="mainTank" title="Unequip Tank">✕</button>
+            </div>
+
+            <div class="rocket-drop-slot group px-2 py-1 rounded border border-slate-700/80 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between gap-2 cursor-pointer transition-all" data-slot="engine" draggable="true" title="Drag to return to inventory">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-slate-400 font-bold uppercase text-[9px]">ENGINE:</span>
+                <span id="slot-engine-val" class="text-cyan-300 font-bold truncate max-w-[85px]">Spark-85</span>
+                <span class="slot-target-tag hidden text-[9px] text-emerald-400 font-bold uppercase ml-1 animate-pulse">DROP</span>
+              </div>
+              <button class="btn-remove-slot text-slate-500 hover:text-rose-400 font-bold text-xs px-1" data-remove="engine" title="Unequip Engine">✕</button>
+            </div>
+
+            <div class="rocket-drop-slot group px-2 py-1 rounded border border-slate-700/80 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between gap-2 cursor-pointer transition-all" data-slot="booster" draggable="true" title="Drag to return to inventory">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-slate-400 font-bold uppercase text-[9px]">BOOSTERS:</span>
+                <span id="slot-booster-val" class="text-cyan-300 font-bold truncate max-w-[85px]">None</span>
+                <span class="slot-target-tag hidden text-[9px] text-emerald-400 font-bold uppercase ml-1 animate-pulse">DROP</span>
+              </div>
+              <button class="btn-remove-slot text-slate-500 hover:text-rose-400 font-bold text-xs px-1" data-remove="booster" title="Unequip Boosters">✕</button>
+            </div>
+
+            <div class="rocket-drop-slot group px-2 py-1 rounded border border-slate-700/80 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between gap-2 cursor-pointer transition-all" data-slot="wings" draggable="true" title="Drag to return to inventory">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-slate-400 font-bold uppercase text-[9px]">FINS:</span>
+                <span id="slot-wings-val" class="text-cyan-300 font-bold truncate max-w-[85px]">Micro Delta</span>
+                <span class="slot-target-tag hidden text-[9px] text-emerald-400 font-bold uppercase ml-1 animate-pulse">DROP</span>
+              </div>
+              <button class="btn-remove-slot text-slate-500 hover:text-rose-400 font-bold text-xs px-1" data-remove="wings" title="Reset Fins">✕</button>
+            </div>
+
+            <div class="rocket-drop-slot group px-2 py-1 rounded border border-amber-500/50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between gap-2 cursor-pointer transition-all" data-slot="upgrade" draggable="true" title="Drag to return to inventory">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-amber-400 font-bold uppercase text-[9px]">MODULE:</span>
+                <span id="slot-upgrade-val" class="text-amber-300 font-bold truncate max-w-[85px]">RCS Thrusters</span>
+                <span class="slot-target-tag hidden text-[9px] text-emerald-400 font-bold uppercase ml-1 animate-pulse">DROP</span>
+              </div>
+              <button class="btn-remove-slot text-slate-500 hover:text-rose-400 font-bold text-xs px-1" data-remove="upgrade" title="Unequip Module">✕</button>
+            </div>
+          </div>
+
+          <!-- HTML5 Canvas for Rocket Assembly (pinned, non-moving container) -->
+          <div id="designer-canvas-bay" class="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center select-none">
+            <canvas id="designer-canvas" class="w-full h-full block"></canvas>
+
+            <!-- SimpleRockets 2 Engineering Gizmos (Clean Bottom-Right Controls) -->
+            <div class="absolute bottom-3 right-4 z-20 flex items-center gap-2 pointer-events-auto">
+              <button id="btn-toggle-com" class="px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-700 hover:border-amber-400 text-amber-300 font-mono text-[10px] font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md transition-all active:scale-95" title="Toggle Center of Mass (CoM)">
+                <span class="w-2.5 h-2.5 rounded-full border border-amber-400 bg-amber-400/40 flex items-center justify-center text-[7px] font-black">⊕</span>
+                <span>CoM</span>
+              </button>
+              <button id="btn-toggle-cot" class="px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-700 hover:border-purple-400 text-purple-300 font-mono text-[10px] font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md transition-all active:scale-95" title="Toggle Center of Thrust (CoT)">
+                <span class="text-purple-400 text-[10px] font-black">↑</span>
+                <span>CoT</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: 3-PART SPECS & LAUNCH BUTTON -->
+        <aside class="w-72 lg:w-80 border-l border-blue-900/30 bg-slate-950/90 flex flex-col justify-between shrink-0 p-3 overflow-y-auto z-20">
+          
+          <div class="space-y-2.5">
+            <!-- 1. STAGE 1 / CORE -->
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+              <div class="flex items-center justify-between text-[11px] font-extrabold text-blue-400 uppercase tracking-wider mb-1">
+                <span>1. STAGE 1 / CORE</span>
+                <span id="chk-s1-twr" class="text-amber-300 font-mono">3.8 TWR</span>
+              </div>
+              <div class="space-y-0.5 text-[10px] font-mono text-slate-300">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Core Mass:</span>
+                  <span id="chk-s1-mass" class="text-white">650 kg + 2,400 kg fuel</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Liftoff Thrust:</span>
+                  <span id="chk-s1-thrust" class="text-emerald-400 font-bold">140 kN</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Burn Duration:</span>
+                  <span id="chk-s1-burn" class="text-white">25s</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. STAGE 2 & PAYLOAD -->
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+              <div class="flex items-center justify-between text-[11px] font-extrabold text-cyan-400 uppercase tracking-wider mb-1">
+                <span>2. STAGE 2 & PAYLOAD</span>
+                <span id="chk-s2-target" class="text-cyan-300 font-mono text-[10px]">Suborbital</span>
+              </div>
+              <div class="space-y-0.5 text-[10px] font-mono text-slate-300">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Upper Mass:</span>
+                  <span id="chk-s2-mass" class="text-white">Single Stage</span>
+                </div>
+                <div class="pt-1">
+                  <div class="flex justify-between text-[10px] mb-0.5">
+                    <span id="chk-payload-rel-text" class="text-slate-300">98% Payload Reliability</span>
+                  </div>
+                  <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="chk-payload-rel-bar" class="h-full bg-emerald-400 rounded-full" style="width: 98%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. LAUNCH READINESS & SPECS (Zero pre-launch income shown) -->
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+              <div class="flex items-center justify-between text-[11px] font-extrabold text-amber-400 uppercase tracking-wider mb-1">
+                <span>3. MISSION FEASIBILITY</span>
+                <span id="chk-build-months" class="text-slate-400 font-mono text-[10px]">1 Month</span>
+              </div>
+              <div class="space-y-0.5 text-[10px] font-mono text-slate-300">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Total Wet Mass:</span>
+                  <span id="chk-total-mass" class="text-white font-bold">3,090 kg</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Build Cost:</span>
+                  <span id="chk-total-cost" class="text-amber-300 font-bold">Ⓢ 275K</span>
+                </div>
+                <div class="pt-1">
+                  <div class="flex justify-between text-[10px] mb-0.5">
+                    <span id="chk-launch-rel-text" class="text-slate-300">97% Reliability</span>
+                  </div>
+                  <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="chk-launch-rel-bar" class="h-full bg-emerald-400 rounded-full" style="width: 97%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM-RIGHT ANCHORED LAUNCH BUTTON -->
+          <div class="pt-2">
+            <button id="btn-designer-launch" class="w-full py-3.5 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
+              <span>LAUNCH MISSION</span>
+            </button>
+          </div>
+
+        </aside>
+
+      </section>
+
+      <!-- VIEW 2: CONTRACTS -->
+      <section id="view-missions" class="app-view p-6 max-w-5xl mx-auto space-y-4 h-full overflow-y-auto" style="display: none;">
+        <div>
+          <h2 class="text-xl font-extrabold text-white tracking-tight">Space Exploration Contracts</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Select an active contract to direct agency engineering goals.</p>
+        </div>
+        <div id="missions-list-container" class="space-y-3"></div>
+      </section>
+
+      <!-- VIEW 3: BLUEPRINTS -->
+      <section id="view-crafting" class="app-view p-6 max-w-6xl mx-auto space-y-4 h-full overflow-y-auto" style="display: none;">
+        <div>
+          <h2 class="text-xl font-extrabold text-white tracking-tight">Rocket Engineering & Blueprint Board</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Combine 4 identical components of the same level to engineer a Tier+1 upgraded component.</p>
+        </div>
+        <div id="crafting-workbench"></div>
+        <div id="crafting-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      </section>
+
+      <!-- VIEW 4: LAUNCH SIMULATION -->
+      <section id="view-flight" class="app-view h-full w-full relative overflow-hidden" style="display: none;">
+        <canvas id="flight-canvas" class="w-full h-full block"></canvas>
+
+        <div id="flight-countdown-overlay" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-center z-30" style="display: none;">
+          <div class="text-xs uppercase tracking-widest font-mono text-cyan-400 mb-2">LAUNCH COMPLEX T-MINUS</div>
+          <div id="flight-countdown-number" class="text-7xl font-black font-mono text-white tracking-tighter animate-pulse">3</div>
+        </div>
+
+        <div id="flight-record-banner" class="fixed top-24 left-1/2 -translate-x-1/2 text-center p-5 rounded-2xl bg-amber-950/90 border-2 border-amber-400 shadow-2xl z-40" style="display: none;"></div>
+        <div id="flight-transient-toast" class="opacity-0 transition-opacity pointer-events-none"></div>
+
+        <!-- Incoming Asteroid Radar Danger Banner -->
+        <div id="hud-asteroid-warning" class="fixed top-20 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full font-mono text-xs font-black bg-rose-600/90 text-white border-2 border-rose-300 shadow-2xl z-40 animate-pulse pointer-events-none" style="display: none;">
+          ⚠️ INCOMING ASTEROIDS AHEAD! STEER [A / D] TO EVADE! ⚠️
+        </div>
+
+        <!-- Fuel Exhausted / MECO Coasting Banner -->
+        <div id="hud-meco-banner" class="fixed top-24 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl bg-amber-950/95 border-2 border-amber-400/90 text-amber-300 font-mono text-xs font-bold text-center shadow-2xl z-40 pointer-events-none" style="display: none;">
+          <div class="text-sm font-black text-amber-200 uppercase">⚡ ENGINES CUTOFF (MECO) - FUEL ZERO</div>
+          <div class="text-[10px] text-amber-300/80 mt-0.5">Rocket is coasting on ballistic momentum towards apogee!</div>
+        </div>
+
+        <!-- Quirky Astronaut Radio Chatter Box -->
+        <div id="hud-comical-chatter" class="fixed bottom-24 left-1/2 -translate-x-1/2 max-w-md w-[90%] p-3 rounded-2xl bg-slate-950/95 border border-cyan-400/80 shadow-2xl backdrop-blur-md text-cyan-200 font-mono text-xs z-30 pointer-events-none flex items-center gap-3 transition-all" style="display: none;">
+          <div class="w-8 h-8 rounded-full bg-cyan-950 border border-cyan-400 flex items-center justify-center shrink-0 text-base">👨‍🚀</div>
+          <div id="hud-chatter-text" class="flex-1 text-[11px] leading-tight text-white font-mono"></div>
+        </div>
+
+        <!-- FLIGHT HUD -->
+        <div class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 z-20">
+          <div class="flex items-start justify-between">
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 shadow-xl backdrop-blur-md pointer-events-auto font-mono">
+              <div class="text-[10px] uppercase font-bold text-slate-400">ALTITUDE</div>
+              <div id="hud-altitude-val" class="text-2xl font-black text-white mt-0.5">0 m</div>
+              <div class="text-[10px] text-amber-400 mt-0.5">
+                RECORD: <span id="hud-best-record-val">0 m</span>
+              </div>
+            </div>
+
+            <!-- Center Stage & Goal Radar -->
+            <div class="flex flex-col items-center gap-1.5 pointer-events-auto">
+              <span id="hud-zone-badge" class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-blue-600/60 border border-blue-400/80 text-white shadow backdrop-blur-md">
+                Zone 1 · Troposphere
+              </span>
+              <div class="flex items-center gap-2">
+                <span id="hud-stage-badge" class="px-2 py-0.5 rounded font-mono text-[9px] font-bold bg-slate-900 border border-slate-700 text-cyan-300">
+                  STAGE 1
+                </span>
+                <span id="hud-flight-goal-badge" class="px-2 py-0.5 rounded font-mono text-[9px] font-bold bg-emerald-950 border border-emerald-500/60 text-emerald-300">
+                  🎯 GOAL: 8,000m
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2 pointer-events-auto font-mono">
+              <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 shadow-xl backdrop-blur-md text-right">
+                <div class="text-[10px] uppercase font-bold text-slate-400">SPEED</div>
+                <div id="hud-speed-val" class="text-2xl font-black text-cyan-300 mt-0.5">0 m/s</div>
+                <div class="text-[10px] text-amber-400 font-bold mt-0.5">
+                  LOOT: <span id="hud-loot-val">+0K</span>
+                </div>
+              </div>
+              <button id="hud-abort-flight" class="px-3 py-2 rounded-xl text-xs font-bold bg-rose-600/80 hover:bg-rose-500 text-white border border-rose-400 shadow">
+                ABORT
+              </button>
+            </div>
+          </div>
+
+          <div id="hud-event-alert" class="mx-auto max-w-md p-3 rounded-xl bg-slate-950/90 border border-amber-500/80 shadow-2xl backdrop-blur-md text-center pointer-events-auto" style="display: none;"></div>
+
+          <div class="flex items-end justify-between gap-4">
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 shadow-xl backdrop-blur-md w-60 pointer-events-auto space-y-2">
+              <div>
+                <div class="flex justify-between text-[10px] font-mono text-slate-300 mb-1">
+                  <span>STAGE FUEL</span>
+                  <span id="hud-fuel-val" class="text-amber-400 font-bold">100%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div id="hud-fuel-bar" class="h-full bg-amber-400 transition-all duration-100" style="width: 100%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[10px] font-mono text-slate-300 mb-1">
+                  <span>ROCKET INTEGRITY</span>
+                  <span id="hud-stability-val" class="text-emerald-400 font-bold">100%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div id="hud-integrity-bar" class="h-full bg-emerald-400 transition-all duration-100" style="width: 100%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hidden md:flex px-4 py-2 rounded-xl bg-slate-950/80 border border-slate-800 font-mono text-[11px] text-slate-300 gap-3 pointer-events-auto shadow">
+              <span>[A / ◄] LEFT</span>
+              <span>·</span>
+              <span>[D / ►] RIGHT</span>
+              <span>·</span>
+              <span class="text-amber-300 font-bold">[SPACE] BOOST</span>
+            </div>
+
+            <div class="flex items-center gap-1.5 pointer-events-auto">
+              <button id="hud-btn-left" class="w-11 h-11 rounded-xl border border-slate-700 bg-slate-900 text-white font-bold text-base active:bg-blue-600 flex items-center justify-center">
+                ◄
+              </button>
+              <button id="hud-btn-boost" class="px-3 h-11 rounded-xl border border-amber-500/80 bg-amber-500/20 text-amber-300 font-bold text-xs active:bg-amber-500 active:text-slate-950 flex items-center justify-center uppercase font-mono">
+                BOOST
+              </button>
+              <button id="hud-btn-right" class="w-11 h-11 rounded-xl border border-slate-700 bg-slate-900 text-white font-bold text-base active:bg-blue-600 flex items-center justify-center">
+                ►
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- POST-FLIGHT DEBRIEFING MODAL -->
+        <div id="flight-debrief-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4" style="display: none;">
+          <div class="max-w-md w-full p-5 rounded-2xl bg-slate-900 border border-blue-500/40 shadow-2xl space-y-4">
+            <div class="text-center">
+              <h3 class="text-lg font-extrabold text-white tracking-tight">MISSION DEBRIEFING</h3>
+              <p class="text-xs text-slate-400">Flight telemetric telemetry gathered.</p>
+            </div>
+
+            <div id="debrief-record-banner" class="p-2.5 rounded-xl bg-amber-500/20 border border-amber-400 text-amber-300 font-bold text-center text-xs" style="display: none;">
+              NEW PERSONAL RECORD ACHIEVED!
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-center font-mono">
+              <div>
+                <div class="text-[9px] text-slate-500">Peak Alt</div>
+                <div id="debrief-alt-val" class="text-sm font-bold text-white mt-0.5">0 m</div>
+              </div>
+              <div>
+                <div class="text-[9px] text-slate-500">Duration</div>
+                <div id="debrief-time-val" class="text-sm font-bold text-cyan-300 mt-0.5">0s</div>
+              </div>
+              <div>
+                <div class="text-[9px] text-slate-500">Top Speed</div>
+                <div id="debrief-speed-val" class="text-sm font-bold text-emerald-400 mt-0.5">0 m/s</div>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-around font-mono">
+              <div>
+                <span class="text-xs text-slate-400">Bounty:</span>
+                <span id="debrief-funds-val" class="text-sm font-bold text-amber-400 ml-1">+0K</span>
+              </div>
+              <div>
+                <span class="text-xs text-slate-400">Science:</span>
+                <span id="debrief-science-val" class="text-sm font-bold text-cyan-400 ml-1">+0</span>
+              </div>
+            </div>
+
+            <div id="debrief-discovery-box"></div>
+
+            <button id="btn-debrief-continue" class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30 transition-all">
+              Return to Vehicle Designer
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: RECORDS -->
+      <section id="view-records" class="app-view p-6 h-full overflow-y-auto" style="display: none;">
+        <div id="records-container"></div>
+      </section>
+
+      <!-- VIEW 6: PROFILE -->
+      <section id="view-profile" class="app-view p-6 h-full overflow-y-auto" style="display: none;">
+        <div id="profile-container"></div>
+      </section>
+
+      <!-- VIEW 7: SETTINGS -->
+      <section id="view-settings" class="app-view p-6 h-full overflow-y-auto" style="display: none;">
+        <div id="settings-container"></div>
+      </section>
+
+    </main>
+
+    <!-- FLEET HANGAR MODAL (Ready-Made Rockets from 'Rockets of the World') -->
+    <div id="fleet-hangar-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4" style="display: none;">
+      <div class="max-w-4xl w-full p-6 rounded-2xl bg-slate-900 border border-blue-500/40 shadow-2xl relative flex flex-col max-h-[90vh]">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div>
+            <h3 class="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-8a3 3 0 0 1 6 0v8"/></svg>
+              Rocket Fleet Hangar · Ready-Made Rockets
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Acquire pre-assembled multi-stage vehicles inspired by historic and orbital space programs.</p>
+          </div>
+          <button id="btn-close-hangar" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center">✕</button>
+        </div>
+
+        <div id="fleet-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 my-4 overflow-y-auto flex-1 p-1">
+          <!-- Populated dynamically by fleet.js -->
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
+          <span>Acquired rockets can be piloted immediately or customized in the Designer.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTHENTICATION MODAL -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4" style="display: none;">
+      <div class="max-w-md w-full p-6 rounded-2xl bg-slate-900 border border-blue-500/40 shadow-2xl relative">
+        <button id="btn-close-auth" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+
+        <div id="auth-login-view">
+          <h3 class="text-lg font-bold text-white mb-1">Director Authorization</h3>
+          <p class="text-xs text-slate-400 mb-4">Enter credentials to restore your space program profile.</p>
+
+          <form id="auth-login-form" class="space-y-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Director Callsign</label>
+              <input type="text" id="login-username" required minlength="3" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-blue-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Password</label>
+              <input type="password" id="login-password" required minlength="4" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-blue-400 focus:outline-none">
+            </div>
+            <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all">
+              Access Terminal
+            </button>
+          </form>
+
+          <div class="mt-4 text-center">
+            <a href="#" id="btn-switch-to-register" class="text-xs text-blue-400 hover:underline">
+              Establish new Space Agency? Register here
+            </a>
+          </div>
+        </div>
+
+        <div id="auth-register-view" style="display: none;">
+          <h3 class="text-lg font-bold text-white mb-1">Commission New Space Agency</h3>
+          <p class="text-xs text-slate-400 mb-4">Establish your persistent agency profile on the central server.</p>
+
+          <form id="auth-register-form" class="space-y-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Director Callsign</label>
+              <input type="text" id="reg-username" required minlength="3" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-blue-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Password</label>
+              <input type="password" id="reg-password" required minlength="4" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-blue-400 focus:outline-none">
+            </div>
+            <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all">
+              Commission Agency
+            </button>
+          </form>
+
+          <div class="mt-4 text-center">
+            <a href="#" id="btn-switch-to-login" class="text-xs text-blue-400 hover:underline">
+              Already have credentials? Access Terminal
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOM FLOATING DRAG GHOST (Rasim qb emas, element qb) -->
+    <div id="designer-floating-drag-ghost" class="fixed pointer-events-none z-50 hidden p-2 rounded-xl bg-slate-900/95 border-2 border-cyan-400 shadow-2xl backdrop-blur-md flex items-center gap-2.5 -translate-x-1/2 -translate-y-1/2 font-mono">
+      <div id="ghost-icon-wrap" class="w-10 h-10 rounded-lg bg-slate-950 border border-slate-700 flex items-center justify-center shrink-0"></div>
+      <div class="text-left">
+        <div id="ghost-name" class="text-xs font-bold text-white">Part Name</div>
+        <div id="ghost-sub" class="text-[9px] text-cyan-300 font-semibold uppercase flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>SNAP TO ROCKET / TASHING</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/js/app.js"></script>
+  </body>
+</html>
